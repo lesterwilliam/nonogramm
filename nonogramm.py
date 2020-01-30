@@ -51,9 +51,6 @@ class Nonogramm:
 			if verticalSum == self.sizeX:
 				guard = guard + 1
 		
-		
-		
-		
 		if guard == 2:
 			return 1
 		else:
