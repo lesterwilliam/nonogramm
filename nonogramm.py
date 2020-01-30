@@ -41,22 +41,27 @@ class Nonogramm:
 			guard = guard + 1
 		
 		verticalSum = 0
+		for x in range(self.sizeX):
+			sumField = 0
+			for y in range(self.sizeY):
+				sumField = sumField + self.field[y][x]
+			if sumField == sum(self.inputX[x]):
+				verticalSum = verticalSum + 1
+				
+			if verticalSum == self.sizeX:
+				guard = guard + 1
 		
 		
 		
 		
-		
-		
-		if guard == 1:
+		if guard == 2:
 			return 1
 		else:
 			return 0
 	
 
 NG = Nonogramm(6,4)
-
 NG.printInput()
-
 while(NG.check() == 0):
 	NG.solveRandom()
 NG.printField()
