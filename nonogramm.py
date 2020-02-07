@@ -81,6 +81,27 @@ class Nonogramm:
         self.field = self.fieldFound
         self.certainty = sum(sum(row) for row in self.fieldLock)
 
+    def findEmpty(self):
+        for y in range(self.sizeY):
+            if sum(self.fieldFound[y]) == sum(self.inputInfoY[y]):
+                for x in range(self.sizeX):
+                    if self.fieldFound[y][x] == 0:
+                        self.fieldLock[y][x] = 1
+        # add y-axis
+
+    def findFull(self):
+        for y in range(self.sizeY):
+            if self.sizeY - sum(self.fieldLock[y]) == sum(self.inputInfoY[y]) - sum(self.fieldFound[y]):
+                for x in range(self.sizeX):
+                    if self.fieldLock[y][x] == 0:
+                        self.fieldFound[y][x] = 1
+                        self.field[y][x] = 1
+                    self.fieldLock[y][x] = 1
+        # doesn't work somehow
+        
+        # add y-axis
+
+
     def fillRandom(self):
         # before adding findBeginning
             # 0.535ms for 2x2 in average
@@ -102,16 +123,12 @@ class Nonogramm:
         while(self.check() == 0):
             self.clear()
             self.findBeginning()
+            self.findEmpty()
+            #self.printFieldLock()
+            #self.findFull()
+            #self.printFieldLock()
+            self.printField()
             self.fillRandom()
-
-    def fillRandomBetter(self):
-        # ms for 2x2 in average
-        # ms for 3x3 in average
-        # s for 4x4 in average
-        # s for 6x4 measured once
-        for y in range(self.sizeY):
-            for x in range(self.sizeX):
-                self.field[y][x] = int(round(random.randint(0,1) + ((sum(self.inputInfoY[y]) / self.sizeX) - 0.5)))
 
     def solve(self):
         while(self.check() == 0):
@@ -179,6 +196,9 @@ input8x8test = [[[8],[6,1],[5,2],[2,2,2],[2],[2],[8],[8]],
 
 input6x6 = [[[4,1],[1,4],[2,3],[1,1],[1],[1,3]],
 [[3],[1,4],[2],[3,1],[3,1],[3,1]]]
+
+input6x6_2 = [[[2,3],[2,3],[2,3],[2],[2,2],[2,2]],
+[[3],[6],[3],[3],[3,2],[3,2]]]
 
 input8x8 = [[[5],[5],[2],[2],[2],[2],[8],[8]],
 [[2],[2],[2],[8],[8],[2,2],[2,2],[2,2]]]
