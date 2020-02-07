@@ -9,6 +9,8 @@ class Nonogramm:
         self.inputInfoY = inputInfo[1]
         self.field = [[0 for x in range(self.sizeX)] for y in range(self.sizeY)]
         self.fieldFound = [[0 for x in range(self.sizeX)] for y in range(self.sizeY)]
+        self.fieldLock = [[0 for x in range(self.sizeX)] for y in range(self.sizeY)]
+        self.certainty = 0
         # 0: unknown
         # 1: full
         # 2: empty
@@ -20,9 +22,17 @@ class Nonogramm:
     def printNG(self):
         print("Testprint.")
 
+    def printInfo(self):
+        print(self.inputInfoX)
+        print(self.inputInfoY)
+
     def printField(self):
         for y in range(self.sizeY):
             print(self.field[y])
+
+    def printFieldLock(self):
+        for y in range(self.sizeY):
+            print(self.fieldLock[y])
 
     def printinputInfo(self):
         print("inputInfoX")
@@ -47,7 +57,7 @@ class Nonogramm:
                         tempInputInfoY2.append(0)
 
                 self.fieldFound[y] = tempInputInfoY2
-            #self.field[y] = self.fieldFound[y]
+                self.fieldLock[y] = [1] * self.sizeX
 
         for x in range(self.sizeX):
             if sum(self.inputInfoX[x]) + len(self.inputInfoX[x]) - 1 == self.sizeY:
@@ -67,7 +77,9 @@ class Nonogramm:
                 for y in range(self.sizeY):
                     if tempInputInfoX2[y] == 1:
                         self.fieldFound[y][x] = tempInputInfoX2[y]
+                    self.fieldLock[y][x] = 1
         self.field = self.fieldFound
+        self.certainty = sum(sum(row) for row in self.fieldLock)
 
     def fillRandom(self):
         # before adding findBeginning
@@ -80,10 +92,13 @@ class Nonogramm:
 
         for y in range(self.sizeY):
             for x in range(self.sizeX):
-                if self.fieldFound[y][x] == 0:
+                if self.fieldLock[y][x] == 0:
                     self.field[y][x] = random.randint(0,1)
 
     def solveRandom(self):
+        self.findBeginning()
+        print("\nFound with [findBeginning]:")
+        print(self.certainty)
         while(self.check() == 0):
             self.clear()
             self.findBeginning()
@@ -156,21 +171,22 @@ print("Starting session.")
 gameNumber = 1
 startTime = time.time()
 
-input4x4 = [[[2], [2], [3], [1, 2]],
-         [[4],
-          [3],
-          [2],
-          [1]
-         ]
-        ]
+input4x4 = [[[2],[2],[3],[1, 2]],
+[[4],[3],[2],[1]]]
 
 input8x8test = [[[8],[6,1],[5,2],[2,2,2],[2],[2],[8],[8]],
 [[2],[2],[2],[8],[8],[2,2],[2,2],[8]]]
 
+input6x6 = [[[4,1],[1,4],[2,3],[1,1],[1],[1,3]],
+[[3],[1,4],[2],[3,1],[3,1],[3,1]]]
+
 input8x8 = [[[5],[5],[2],[2],[2],[2],[8],[8]],
 [[2],[2],[2],[8],[8],[2,2],[2,2],[2,2]]]
 
-inputInfo = input8x8
+input8x8prettyfull = [[[4],[8],[6,1],[4,3],[4,3],[4,1,1],[5,2],[1,2,3]],
+[[8],[7],[8],[8],[2,1],[5,1],[1,2,2],[7]]]
+
+inputInfo = input6x6
 
 size = [len(inputInfo[0]), len(inputInfo[1])]
 print("\nInput information:")
@@ -182,11 +198,12 @@ for x in range(gameNumber):
     NG = Nonogramm(size, inputInfo)
     NG.solveRandom()
 
-    print("\nSolution:")
+    print("\n\nSolution:")
     NG.printField()
 
-print("\nAverage time:", (time.time() - startTime) / gameNumber, "seconds")
-
-
+if gameNumber == 1:
+    print("\nUsed time:", (time.time() - startTime) / gameNumber, "seconds")
+else:
+    print("\nAverage time:", (time.time() - startTime) / gameNumber, "seconds")
 
 input("\nPress ENTER to exit.")
