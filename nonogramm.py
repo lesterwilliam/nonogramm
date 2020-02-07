@@ -8,47 +8,88 @@ class Nonogramm:
         self.inputInfoX = inputInfo[0]
         self.inputInfoY = inputInfo[1]
         self.field = [[0 for x in range(self.sizeX)] for y in range(self.sizeY)]
-        self.fieldFound = self.field
+        self.fieldFound = [[0 for x in range(self.sizeX)] for y in range(self.sizeY)]
         # 0: unknown
         # 1: full
         # 2: empty
-    
+
+    def clear(self):
+        self.field = [[0 for x in range(self.sizeX)] for y in range(self.sizeY)]
+        self.fieldFound = [[0 for x in range(self.sizeX)] for y in range(self.sizeY)]
+
     def printNG(self):
         print("Testprint.")
-    
+
     def printField(self):
         for y in range(self.sizeY):
             print(self.field[y])
-    
+
     def printinputInfo(self):
         print("inputInfoX")
         print(self.inputInfoX)
         print("inputInfoY")
         print(self.inputInfoY)
-    
+
     def findBeginning(self):
         for y in range(self.sizeY):
             if sum(self.inputInfoY[y]) + len(self.inputInfoY[y]) - 1 == self.sizeX:
+                tempInputInfoY = []
+                tempInputInfoY2 = []
+                for item in range(len(self.inputInfoY[y])):
+                    tempInputInfoY.append(self.inputInfoY[y][item])
+                    if item != (len(self.inputInfoY[y]) - 1):
+                        tempInputInfoY.append(0)
+                for item in tempInputInfoY:
+                    if item != 0:
+                        for amounthOfOnes in range(item):
+                            tempInputInfoY2.append(1)
+                    else:
+                        tempInputInfoY2.append(0)
+
+                self.fieldFound[y] = tempInputInfoY2
+            #self.field[y] = self.fieldFound[y]
+
+        for x in range(self.sizeX):
+            if sum(self.inputInfoX[x]) + len(self.inputInfoX[x]) - 1 == self.sizeY:
                 tempInputInfoX = []
-                tempInputInfoX = self.inputInfoX[y]
+                tempInputInfoX2 = []
+                for item in range(len(self.inputInfoX[x])):
+                    tempInputInfoX.append(self.inputInfoX[x][item])
+                    if item != (len(self.inputInfoX[x]) - 1):
+                        tempInputInfoX.append(0)
                 for item in tempInputInfoX:
-                    if item >= 2:
-                        print("one")
-                        pos = tempInputInfoX.index(item)
-                        tempInputInfoX[pos:pos+1] = (1, item - 1)
-                self.fieldFound[y] = tempInputInfoX
-                self.field[y] = self.fieldFound[y]
-    
-    def solveRandom(self):
-        # 0.535ms for 2x2 in average
-        # 5.26ms for 3x3 in average
-        # 3.86s for 4x4 in average
-        # 547s for 6x4 measured once
+                    if item != 0:
+                        for amounthOfOnes in range(item):
+                            tempInputInfoX2.append(1)
+                    else:
+                        tempInputInfoX2.append(0)
+
+                for y in range(self.sizeY):
+                    if tempInputInfoX2[y] == 1:
+                        self.fieldFound[y][x] = tempInputInfoX2[y]
+        self.field = self.fieldFound
+
+    def fillRandom(self):
+        # before adding findBeginning
+            # 0.535ms for 2x2 in average
+            # 5.26ms for 3x3 in average
+            # 3.86s for 4x4 in average
+            # 547s for 6x4 measured once
+        # after adding findBeginning
+            # 100ms for 4x4 in nAverage
+
         for y in range(self.sizeY):
             for x in range(self.sizeX):
-                self.field[y][x] = random.randint(0,1)
-    
-    def solveRandomBetter(self):
+                if self.fieldFound[y][x] == 0:
+                    self.field[y][x] = random.randint(0,1)
+
+    def solveRandom(self):
+        while(self.check() == 0):
+            self.clear()
+            self.findBeginning()
+            self.fillRandom()
+
+    def fillRandomBetter(self):
         # ms for 2x2 in average
         # ms for 3x3 in average
         # s for 4x4 in average
@@ -56,21 +97,18 @@ class Nonogramm:
         for y in range(self.sizeY):
             for x in range(self.sizeX):
                 self.field[y][x] = int(round(random.randint(0,1) + ((sum(self.inputInfoY[y]) / self.sizeX) - 0.5)))
-    
-    def solveOnlyUnknownRandom(self):
-        for y in range(self.sizeY):
-            for x in range(self.sizeX):
-                if self.fieldFound[y][x] == 1 or 2:
-                    self.field[y][x] = self.fieldFound[y][x]
-                else:
-                    self.field[y][x] = random.randint(0,1)
-    
+
+    def solve(self):
+        while(self.check() == 0):
+            self.fillRandom()
+            self.printField()
+
     def check(self):
         horizontalSpacing = 0
         for y in range(self.sizeY):
             foundinputInfoY = []
             foundinputInfoY.append(0)
-            
+
             for x in range(self.sizeX):
                 if self.field[y][x] == 1:
                     if x == 0:
@@ -86,12 +124,12 @@ class Nonogramm:
             horizontalSpacing = 1
         else:
             horizontalSpacing = 0
-        
+
         verticalSpacing = 0
         for x in range(self.sizeX):
             foundinputInfoX = []
             foundinputInfoX.append(0)
-            
+
             for y in range(self.sizeY):
                 if self.field[y][x] == 1:
                     if y == 0:
@@ -107,9 +145,8 @@ class Nonogramm:
             verticalSpacing = 1
         else:
             verticalSpacing = 0
-        
+
         if horizontalSpacing == 1 and verticalSpacing == 1:
-            self.fieldFound = self.field
             return 1
         else:
             return 0
@@ -119,14 +156,21 @@ print("Starting session.")
 gameNumber = 1
 startTime = time.time()
 
-
-inputInfo = [[[2], [2], [3], [1, 2]],
+input4x4 = [[[2], [2], [3], [1, 2]],
          [[4],
           [3],
           [2],
           [1]
          ]
         ]
+
+input8x8test = [[[8],[6,1],[5,2],[2,2,2],[2],[2],[8],[8]],
+[[2],[2],[2],[8],[8],[2,2],[2,2],[8]]]
+
+input8x8 = [[[5],[5],[2],[2],[2],[2],[8],[8]],
+[[2],[2],[2],[8],[8],[2,2],[2,2],[2,2]]]
+
+inputInfo = input8x8
 
 size = [len(inputInfo[0]), len(inputInfo[1])]
 print("\nInput information:")
@@ -136,11 +180,8 @@ print(size)
 
 for x in range(gameNumber):
     NG = Nonogramm(size, inputInfo)
-    
-    while(NG.check() == 0):
-        NG.findBeginning()
-        NG.solveOnlyUnknownRandom()
-    
+    NG.solveRandom()
+
     print("\nSolution:")
     NG.printField()
 
